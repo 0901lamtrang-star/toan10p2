@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Quest II — Đúng/Sai · Toán 10</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,600;1,9..144,800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117; --bg-2: #161b22;
+    --ink: #f0ebe1; --ink-dim: #8b95a7;
+    --accent: #ffd23f; --accent-2: #ff6b6b; --accent-3: #4ecdc4;
+    --correct: #6bcf7f; --wrong: #ff6b6b;
+    --card: rgba(255,255,255,0.04); --card-border: rgba(255,255,255,0.1);
+    --gold: #ffd23f; --silver: #c0c0c0; --bronze: #cd7f32;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Fraunces', serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh; overflow-x: hidden; position: relative; line-height: 1.5;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 15% 5%, rgba(255,210,63,0.08), transparent 50%),
+      radial-gradient(ellipse 600px 800px at 90% 90%, rgba(78,205,196,0.06), transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none; z-index: 0;
+  }
+  .container { max-width: 920px; margin: 0 auto; padding: 32px 20px 60px; position: relative; z-index: 1; }
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 40px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 12px;
+  }
+  .logo { font-size: 26px; font-weight: 900; letter-spacing: -0.03em; font-style: italic; cursor: pointer; user-select: none; }
+  .logo span { color: var(--accent); }
+  .tagline { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.25em; }
+  .screen { display: none; animation: fadeIn 0.5s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+  .hero { text-align: center; padding: 20px 0 40px; }
+  .hero-decoration { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.3em; margin-bottom: 16px; opacity: 0.7; }
+  .hero h1 { font-size: clamp(44px, 9vw, 88px); font-weight: 900; line-height: 0.92; letter-spacing: -0.045em; margin-bottom: 20px; }
+  .hero h1 em { font-style: italic; color: var(--accent); display: block; font-weight: 800; }
+  .hero p { font-size: 17px; color: var(--ink-dim); max-width: 540px; margin: 0 auto 20px; line-height: 1.65; }
+
+  .matrix-info {
+    background: rgba(78,205,196,0.06); border: 1px solid rgba(78,205,196,0.2);
+    border-radius: 14px; padding: 14px 18px;
+    margin: 16px auto; max-width: 580px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--ink-dim); letter-spacing: 0.05em;
+    line-height: 1.6; text-align: center;
+  }
+  .matrix-info strong { color: var(--accent-3); }
+
+  .scoring-info {
+    background: rgba(255,210,63,0.05); border: 1px solid rgba(255,210,63,0.2);
+    border-radius: 14px; padding: 16px 20px;
+    margin: 16px auto 28px; max-width: 580px;
+    font-size: 13px; color: var(--ink-dim);
+    text-align: left;
+  }
+  .scoring-info strong { color: var(--accent); }
+  .scoring-info table { width: 100%; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .scoring-info td { padding: 3px 8px; }
+  .scoring-info td:last-child { color: var(--accent); font-weight: 700; text-align: right; }
+
+  .stats-row { display: flex; justify-content: center; gap: 32px; margin-bottom: 32px; flex-wrap: wrap; }
+  .stat-mini { text-align: center; }
+  .stat-mini .num { font-size: 32px; font-weight: 800; color: var(--accent); font-style: italic; display: block; line-height: 1; }
+  .stat-mini .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.2em; margin-top: 6px; }
+
+  .name-input-wrap { max-width: 420px; margin: 0 auto 28px; }
+  .name-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 10px; text-align: left; }
+  .name-input { width: 100%; background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 18px 22px; color: var(--ink); font-family: 'Fraunces', serif; font-size: 17px; outline: none; transition: all 0.25s; }
+  .name-input:focus { border-color: var(--accent); background: rgba(255,210,63,0.04); box-shadow: 0 0 0 4px rgba(255,210,63,0.08); }
+  .name-input::placeholder { color: var(--ink-dim); opacity: 0.5; }
+
+  .actions-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .btn-primary { background: var(--accent); color: var(--bg); border: none; padding: 18px 44px; border-radius: 100px; font-family: 'Fraunces', serif; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.25s; display: inline-flex; align-items: center; gap: 10px; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(255,210,63,0.25); }
+  .btn-secondary { background: transparent; color: var(--ink); border: 1px solid var(--card-border); padding: 16px 28px; border-radius: 100px; font-family: 'Fraunces', serif; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--ink-dim); border: none; padding: 8px 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; cursor: pointer; transition: color 0.2s; }
+  .btn-ghost:hover { color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-header { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; margin-bottom: 24px; padding: 18px 24px; background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; }
+  .stat-box { font-family: 'JetBrains Mono', monospace; }
+  .stat-box .lbl { font-size: 9px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 4px; }
+  .stat-box .val { font-size: 22px; font-weight: 700; line-height: 1; }
+  .stat-box .val.timer { color: var(--accent); }
+  .stat-box .val.timer.warn { color: var(--accent-2); animation: pulse 0.6s infinite; }
+  .stat-box .val.score { color: var(--correct); }
+  .stat-box.right { text-align: right; }
+  .stat-box.center { text-align: center; }
+
+  .progress-bar { height: 4px; background: var(--card-border); border-radius: 100px; overflow: hidden; margin-bottom: 28px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-3), var(--accent)); transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 100px; }
+
+  .question-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 22px; padding: 36px; margin-bottom: 20px; animation: slideUp 0.4s ease; }
+  .question-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+  .question-num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent-3); text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700; }
+  .question-topic { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.15em; padding: 4px 10px; border: 1px solid var(--card-border); border-radius: 100px; }
+
+  .question-intro {
+    font-size: 18px; font-weight: 600; line-height: 1.55;
+    padding: 18px 22px; margin-bottom: 24px;
+    background: rgba(78,205,196,0.04);
+    border-left: 3px solid var(--accent-3);
+    border-radius: 8px;
+  }
+
+  .item-row {
+    display: grid; grid-template-columns: 32px 1fr; gap: 14px;
+    padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; font-weight: 700;
+    color: var(--accent-3);
+    padding-top: 10px;
+  }
+  .item-content { display: flex; flex-direction: column; gap: 12px; }
+  .item-text {
+    font-size: 16px; line-height: 1.55;
+  }
+  .ts-buttons {
+    display: flex; gap: 10px;
+  }
+  .ts-btn {
+    flex: 1; max-width: 130px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-size: 14px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .ts-btn:hover:not(.disabled):not(.selected) {
+    border-color: var(--accent);
+    background: rgba(255,210,63,0.04);
+  }
+  .ts-btn.selected {
+    background: rgba(78,205,196,0.1);
+    border-color: var(--accent-3);
+    color: var(--accent-3);
+  }
+  .ts-btn.disabled { cursor: not-allowed; }
+  .ts-btn.correct {
+    border-color: var(--correct);
+    background: rgba(107,207,127,0.12);
+    color: var(--correct);
+  }
+  .ts-btn.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,107,107,0.12);
+    color: var(--wrong);
+  }
+
+  .item-feedback {
+    margin-top: 4px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    display: none;
+  }
+  .item-feedback.show { display: block; }
+  .item-feedback.correct {
+    background: rgba(107,207,127,0.06);
+    border: 1px solid rgba(107,207,127,0.25);
+    color: var(--correct);
+  }
+  .item-feedback.wrong {
+    background: rgba(255,107,107,0.06);
+    border: 1px solid rgba(255,107,107,0.25);
+    color: var(--wrong);
+  }
+  .item-feedback strong { color: var(--ink); }
+
+  .next-row { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 12px; flex-wrap: wrap; }
+  .progress-info { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-dim); }
+  .btn-next { background: var(--accent-3); color: var(--bg); border: none; padding: 14px 32px; border-radius: 100px; font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(78,205,196,0.3); }
+
+  /* RESULT */
+  .result-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 24px; padding: 48px 36px; text-align: center; margin-bottom: 24px; }
+  .result-emoji { font-size: 72px; margin-bottom: 16px; line-height: 1; }
+  .result-title { font-size: 36px; font-weight: 800; font-style: italic; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .result-subtitle { color: var(--ink-dim); font-size: 16px; margin-bottom: 32px; }
+  .score-big { font-size: 88px; font-weight: 900; color: var(--accent); font-style: italic; line-height: 1; letter-spacing: -0.04em; }
+  .score-out { color: var(--ink-dim); font-size: 22px; font-weight: 400; font-style: normal; }
+  .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0; padding: 24px 0; border-top: 1px solid var(--card-border); border-bottom: 1px solid var(--card-border); }
+  .result-stat .v { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .result-stat .l { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.15em; }
+  .result-stat .v.green { color: var(--correct); }
+  .result-stat .v.red { color: var(--wrong); }
+  .result-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+  .breakdown {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    text-align: left;
+  }
+  .breakdown-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--ink-dim);
+    text-transform: uppercase; letter-spacing: 0.2em;
+    margin-bottom: 12px;
+  }
+  .breakdown-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; font-size: 14px;
+  }
+  .breakdown-row .label { color: var(--ink); }
+  .breakdown-row .right { color: var(--correct); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .breakdown-row .pts { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+  .review-section { margin-top: 40px; padding-top: 32px; border-top: 1px solid var(--card-border); }
+  .review-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.25em; margin-bottom: 20px; }
+
+  .review-card {
+    background: var(--card); border: 1px solid var(--card-border);
+    border-radius: 16px; padding: 24px; margin-bottom: 16px;
+  }
+  .review-card-title {
+    font-size: 14px; font-weight: 700;
+    color: var(--accent-3);
+    text-transform: uppercase; letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .review-intro {
+    font-size: 14px; line-height: 1.6;
+    padding: 12px 16px;
+    background: rgba(78,205,196,0.04);
+    border-left: 2px solid var(--accent-3);
+    border-radius: 6px;
+    margin-bottom: 14px;
+    color: var(--ink-dim);
+  }
+  .review-item-row {
+    display: grid; grid-template-columns: 24px 1fr auto;
+    gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .review-item-row:last-child { border-bottom: none; }
+  .review-item-row .lt { font-family: 'JetBrains Mono', monospace; color: var(--accent-3); font-weight: 700; }
+  .review-item-row .tx { line-height: 1.5; }
+  .review-item-row .tx .pick { display: block; margin-top: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); }
+  .review-item-row .tx .pick.right { color: var(--correct); }
+  .review-item-row .tx .pick.wrong { color: var(--wrong); }
+  .review-item-row .tx .exp { display: block; margin-top: 4px; font-size: 12px; color: var(--ink-dim); font-style: italic; line-height: 1.5; }
+  .review-item-row .mk {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+    height: fit-content;
+  }
+  .review-item-row .mk.ok { background: rgba(107,207,127,0.15); color: var(--correct); }
+  .review-item-row .mk.no { background: rgba(255,107,107,0.15); color: var(--wrong); }
+
+  /* LEADERBOARD */
+  .leaderboard { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 28px; margin-bottom: 24px; }
+  .leaderboard-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; }
+  .leaderboard-title { font-size: 24px; font-weight: 800; font-style: italic; letter-spacing: -0.02em; }
+  .leaderboard-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.2em; }
+  .lb-row { display: grid; grid-template-columns: 40px 1fr auto auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row.me { background: rgba(255,210,63,0.04); margin: 0 -12px; padding: 14px 12px; border-radius: 10px; border-bottom: none; }
+  .lb-rank { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700; color: var(--ink-dim); text-align: center; }
+  .lb-row.gold .lb-rank { color: var(--gold); font-size: 18px; }
+  .lb-row.silver .lb-rank { color: var(--silver); font-size: 17px; }
+  .lb-row.bronze .lb-rank { color: var(--bronze); font-size: 16px; }
+  .lb-name { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-row.me .lb-name::after { content: ' ★'; color: var(--accent); }
+  .lb-time { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-dim); }
+  .lb-score { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+  .empty-lb { text-align: center; padding: 40px 20px; color: var(--ink-dim); font-style: italic; }
+
+  /* DASHBOARD */
+  .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
+  .dash-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px 22px; }
+  .dash-card .lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 8px; }
+  .dash-card .val { font-size: 32px; font-weight: 800; font-style: italic; color: var(--accent); letter-spacing: -0.02em; line-height: 1; }
+  .dash-card .sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); margin-top: 6px; }
+  .dash-section { background: var(--card); border: 1px solid var(--card-border); border-radius: 18px; padding: 24px 28px; margin-bottom: 20px; }
+  .dash-section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .dash-section-title small { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); font-weight: 400; letter-spacing: 0.15em; text-transform: uppercase; }
+
+  .histogram { display: flex; align-items: flex-end; gap: 6px; height: 200px; margin-bottom: 12px; padding: 0 8px; }
+  .hist-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+  .hist-bar { width: 100%; background: linear-gradient(180deg, var(--accent), var(--accent-3)); border-radius: 6px 6px 0 0; min-height: 3px; position: relative; transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+  .hist-bar .count { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--ink); }
+  .hist-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); margin-top: 8px; }
+
+  .qstat-item { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .qstat-item:last-child { border-bottom: none; }
+  .qstat-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; gap: 12px; }
+  .qstat-q { font-size: 14px; font-weight: 600; flex: 1; line-height: 1.5; }
+  .qstat-rate { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; white-space: nowrap; }
+  .qstat-rate.high { color: var(--wrong); }
+  .qstat-rate.mid { color: var(--accent); }
+  .qstat-rate.low { color: var(--correct); }
+  .qstat-bar { height: 6px; background: rgba(255,255,255,0.06); border-radius: 100px; overflow: hidden; margin-bottom: 6px; }
+  .qstat-bar-fill { height: 100%; border-radius: 100px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+  .qstat-bar-fill.high { background: var(--wrong); }
+  .qstat-bar-fill.mid { background: var(--accent); }
+  .qstat-bar-fill.low { background: var(--correct); }
+  .qstat-meta { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); flex-wrap: wrap; gap: 6px; }
+  .qstat-meta .topic { padding: 2px 8px; border: 1px solid var(--card-border); border-radius: 100px; font-size: 10px; }
+
+  .students-table { width: 100%; border-collapse: collapse; }
+  .students-table th { text-align: left; padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 0.15em; border-bottom: 1px solid var(--card-border); }
+  .students-table th.num { text-align: right; }
+  .students-table td { padding: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .students-table td.num { text-align: right; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .students-table td.score { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; }
+  .students-table td.score.green { color: var(--correct); }
+  .students-table td.score.amber { color: var(--accent); }
+  .students-table td.score.red { color: var(--wrong); }
+  .students-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+  .students-table .name-cell { font-weight: 600; }
+
+  .login-overlay { background: rgba(13,17,23,0.95); backdrop-filter: blur(8px); position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .login-box { background: var(--bg-2); border: 1px solid var(--card-border); border-radius: 20px; padding: 36px; max-width: 400px; width: 100%; text-align: center; }
+  .login-box h2 { font-size: 26px; font-weight: 800; font-style: italic; margin-bottom: 8px; }
+  .login-box p { color: var(--ink-dim); font-size: 14px; margin-bottom: 24px; }
+  .login-error { color: var(--wrong); font-size: 13px; margin-top: 12px; min-height: 18px; }
+
+  .refresh-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; flex-wrap: wrap; gap: 8px; }
+  .refresh-status { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-dim); }
+  .refresh-status .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--correct); margin-right: 6px; vertical-align: middle; }
+  .refresh-status.error .dot { background: var(--wrong); }
+  .refresh-status.loading .dot { background: var(--accent); animation: pulse 1s infinite; }
+  .btn-icon { background: transparent; border: 1px solid var(--card-border); border-radius: 100px; padding: 8px 16px; color: var(--ink); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s; }
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+  .cloud-status { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ink-dim); letter-spacing: 0.15em; text-transform: uppercase; text-align: center; margin-top: 8px; opacity: 0.6; }
+  .cloud-status .ok { color: var(--correct); }
+  .cloud-status .warn { color: var(--accent); }
+
+  footer { text-align: center; margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--card-border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink-dim); letter-spacing: 0.1em; }
+
+  .history-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 14px; padding: 16px 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .history-info { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-dim); }
+  .history-score { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--accent); }
+
+  .confetti { position: fixed; top: -10px; width: 8px; height: 8px; pointer-events: none; z-index: 999; }
+  .loading-dots::after { content: '...'; display: inline-block; animation: dots 1.4s infinite; width: 24px; text-align: left; }
+  @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px 40px; }
+    .question-card { padding: 24px 20px; }
+    .question-intro { font-size: 16px; padding: 14px 16px; }
+    .item-text { font-size: 14px; }
+    .ts-btn { font-size: 13px; padding: 9px 14px; }
+    .result-card { padding: 36px 24px; }
+    .quiz-header { padding: 14px 18px; gap: 12px; }
+    .stat-box .val { font-size: 18px; }
+    .lb-row { grid-template-columns: 32px 1fr auto auto; gap: 10px; }
+    .lb-name { font-size: 14px; }
+    .result-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .result-stat .v { font-size: 18px; }
+    .score-big { font-size: 64px; }
+    .score-out { font-size: 18px; }
+    .hero h1 { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">Math <em>Quest II</em><span>.</span></div>
+    <div class="tagline">Phần II — Đúng / Sai</div>
+  </header>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="hero">
+      <div class="hero-decoration">— ÔN TẬP —</div>
+      <h1>Toán 10<br><em>Phần II</em></h1>
+      <p>Câu trắc nghiệm <strong>đúng/sai</strong> 4 ý — chuyên đề Đường tròn & Tổ hợp viên bi.</p>
+
+      <div class="matrix-info">
+        <strong>Đề thi tuân thủ ma trận</strong> — mỗi đề 2 câu (1 câu đường tròn + 1 câu tổ hợp), mỗi câu 4 ý a/b/c/d cần xác định ĐÚNG hoặc SAI.
+      </div>
+
+      <div class="scoring-info">
+        <strong>Cách tính điểm theo quy chế thi:</strong>
+        <table>
+          <tr><td>Đúng 1 ý trong 1 câu:</td><td>0,1 điểm</td></tr>
+          <tr><td>Đúng 2 ý:</td><td>0,25 điểm</td></tr>
+          <tr><td>Đúng 3 ý:</td><td>0,5 điểm</td></tr>
+          <tr><td>Đúng cả 4 ý:</td><td>1,0 điểm</td></tr>
+        </table>
+        <div style="margin-top:8px;font-size:12px;">→ Tổng tối đa <strong>2 điểm</strong> (2 câu × 1,0 điểm)</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-mini"><span class="num" id="stat-pool">64</span><div class="lbl">Đề có thể tạo</div></div>
+        <div class="stat-mini"><span class="num">2</span><div class="lbl">Câu / đề</div></div>
+        <div class="stat-mini"><span class="num">10<span style="font-size:18px;color:var(--ink-dim)">′</span></span><div class="lbl">Thời gian</div></div>
+      </div>
+
+      <div class="name-input-wrap">
+        <div class="name-label">Họ và tên của bạn</div>
+        <input type="text" class="name-input" id="player-name" placeholder="Nhập tên của bạn..." maxlength="40">
+      </div>
+
+      <div class="actions-row">
+        <button class="btn-primary" id="btn-start">Bắt đầu làm bài →</button>
+      </div>
+
+      <button class="btn-ghost" id="btn-show-leaderboard">Xem bảng xếp hạng</button>
+      <button class="btn-ghost" id="btn-show-history" style="display:none;">Lịch sử của tôi</button>
+
+      <div class="cloud-status" id="cloud-status"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <div class="stat-box"><div class="lbl">Câu</div><div class="val"><span id="q-current">1</span><span style="color:var(--ink-dim);font-size:14px">/2</span></div></div>
+      <div class="stat-box center"><div class="lbl">Điểm</div><div class="val score" id="q-score">0.0</div></div>
+      <div class="stat-box right"><div class="lbl">Còn lại</div><div class="val timer" id="q-timer">10:00</div></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="question-card" id="question-card"></div>
+    <div class="next-row">
+      <div class="progress-info" id="progress-info">Hãy chọn ĐÚNG hoặc SAI cho mỗi ý</div>
+      <button class="btn-next" id="btn-next" disabled>Câu tiếp theo →</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="screen" id="screen-result">
+    <div class="result-card">
+      <div class="result-emoji" id="r-emoji">🎉</div>
+      <div class="result-title" id="r-title">Hoàn thành!</div>
+      <div class="result-subtitle" id="r-subtitle"></div>
+      <div><span class="score-big" id="r-score">0.0</span><span class="score-out">/2.0</span></div>
+      <div class="result-stats">
+        <div class="result-stat"><div class="v green" id="r-correct">0</div><div class="l">Ý đúng</div></div>
+        <div class="result-stat"><div class="v red" id="r-wrong">0</div><div class="l">Ý sai</div></div>
+        <div class="result-stat"><div class="v" id="r-time">00:00</div><div class="l">Thời gian</div></div>
+      </div>
+
+      <div class="breakdown" id="breakdown"></div>
+
+      <div class="result-actions">
+        <button class="btn-primary" id="btn-retry">Làm đề khác →</button>
+        <button class="btn-secondary" id="btn-home">Về trang chủ</button>
+      </div>
+    </div>
+
+    <div class="review-section">
+      <div class="review-title">— Xem lại bài làm —</div>
+      <div id="review-list"></div>
+    </div>
+    <div class="review-section">
+      <div class="review-title">— Bảng xếp hạng —</div>
+      <div id="result-leaderboard"></div>
+    </div>
+  </div>
+
+  <!-- LB -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="leaderboard">
+      <div class="leaderboard-header"><div class="leaderboard-title">Bảng xếp hạng</div><div class="leaderboard-subtitle">Top học sinh</div></div>
+      <div id="lb-list"></div>
+    </div>
+    <div style="text-align:center;"><button class="btn-secondary" id="btn-back-from-lb">← Quay lại</button></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen" id="screen-history">
+    <div class="leaderboard">
+      <div class="leaderboard-header"><div class="leaderboard-title">Lịch sử của bạn</div><div class="leaderboard-subtitle" id="history-name"></div></div>
+      <div id="history-list"></div>
+    </div>
+    <div style="text-align:center;"><button class="btn-secondary" id="btn-back-from-history">← Quay lại</button></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="screen" id="screen-dashboard">
+    <div class="leaderboard-header" style="margin-bottom:20px;">
+      <div class="leaderboard-title">Dashboard giáo viên</div>
+      <div class="leaderboard-subtitle">Phân tích kết quả Phần II</div>
+    </div>
+    <div class="refresh-bar">
+      <div class="refresh-status" id="refresh-status"><span class="dot"></span>Sẵn sàng</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-icon" id="btn-dash-refresh">↻ Làm mới</button>
+        <button class="btn-icon" id="btn-dash-home">← Trang chủ</button>
+      </div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="dash-card"><div class="lbl">Tổng số lượt</div><div class="val" id="dash-total-attempts">0</div><div class="sub">lượt làm bài</div></div>
+      <div class="dash-card"><div class="lbl">Học sinh</div><div class="val" id="dash-unique-students">0</div><div class="sub">đã tham gia</div></div>
+      <div class="dash-card"><div class="lbl">Điểm trung bình</div><div class="val" id="dash-avg-score">0.0</div><div class="sub">trên 2.0</div></div>
+      <div class="dash-card"><div class="lbl">Tỉ lệ đạt (≥1.0)</div><div class="val" id="dash-pass-rate">0%</div><div class="sub">lượt đạt yêu cầu</div></div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Phân bố điểm số <small>histogram</small></div>
+      <div class="histogram" id="histogram"></div>
+      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-dim);letter-spacing:0.15em;text-transform:uppercase;margin-top:12px;">— Thang điểm 0 → 2.0 —</div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Top 10 ý hỏi sai nhiều nhất <small>tỉ lệ sai cao → thấp</small></div>
+      <div id="qstats-list"></div>
+    </div>
+    <div class="dash-section">
+      <div class="dash-section-title">Danh sách học sinh <small>xếp theo điểm cao nhất</small></div>
+      <div id="students-list"></div>
+    </div>
+  </div>
+
+  <footer><div>MATH QUEST II · ĐÚNG / SAI · TOÁN 10 · 2025–2026</div></footer>
+</div>
+
+<script>
+// ============= QUESTION POOLS =============
+const POOL = {"duong_tron":[{"id":"ct_dt_001","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x − 1)² + (y + 2)² = 9 và điểm A(5; 1).","items":[{"text":"Bán kính của đường tròn (C) bằng 3.","ans":true},{"text":"Tâm của đường tròn (C) là điểm I(−1; 2), do đó khoảng cách IA bằng √37.","ans":false,"exp":"Tâm đúng là I(1; -2), không phải I(-1; 2). IA = √((5-1)² + (1+2)²) = 5."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng 4.","ans":true,"exp":"Tiếp tuyến = √(IA² - R²) = √(25 - 9) = 4."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 2 km.","ans":true,"exp":"Khoảng cách ngắn nhất = IA - R = 5 - 3 = 2 km."}],"global_exp":"Tâm I(1; −2), R = 3; IA = √((5−1)² + (1+2)²) = 5; tiếp tuyến = √(IA² − R²) = 4; khoảng cách ngắn nhất = IA − R = 2."},{"id":"ct_dt_002","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x − 2)² + (y − 1)² = 16 và điểm A(5; 5).","items":[{"text":"Bán kính của đường tròn (C) bằng 16.","ans":false,"exp":"R² = 16 ⇒ R = 4 (không phải 16, học sinh quên căn bậc hai)."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng 5.","ans":true,"exp":"IA = √((5-2)² + (5-1)²) = √(9+16) = 5."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng 3.","ans":true,"exp":"Tiếp tuyến = √(IA² - R²) = √(25 - 16) = 3."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 9 km.","ans":false,"exp":"Khoảng cách ngắn nhất = IA - R = 5 - 4 = 1 km, không phải IA + R = 9 km."}]},{"id":"ct_dt_003","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x + 1)² + (y − 2)² = 4 và điểm A(3; 5).","items":[{"text":"Bán kính của đường tròn (C) bằng 2.","ans":true,"exp":"R² = 4 ⇒ R = 2."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng 5.","ans":true,"exp":"Tâm I(-1; 2), IA = √(4² + 3²) = 5."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng √29.","ans":false,"exp":"Tiếp tuyến = √(IA² - R²) = √(25 - 4) = √21, không phải √(IA² + R²) = √29."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 3 km.","ans":true,"exp":"Khoảng cách ngắn nhất = IA - R = 5 - 2 = 3 km."}]},{"id":"ct_dt_004","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x − 3)² + (y + 1)² = 9 và điểm A(−1; 2).","items":[{"text":"Bán kính của đường tròn (C) bằng 3.","ans":true},{"text":"Tâm của đường tròn (C) là điểm I(−3; 1), do đó khoảng cách IA bằng √5.","ans":false,"exp":"Tâm đúng là I(3; -1), không phải I(-3; 1). IA = √((−1−3)² + (2+1)²) = √25 = 5."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng IA − R = 2.","ans":false,"exp":"Tiếp tuyến = √(IA² - R²) = √(25 - 9) = 4, không phải IA - R = 2 (học sinh nhầm công thức tiếp tuyến với khoảng cách ngắn nhất)."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 2 km.","ans":true,"exp":"Khoảng cách ngắn nhất = IA - R = 5 - 3 = 2 km."}]},{"id":"ct_dt_005","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): x² + (y − 2)² = 36 và điểm A(8; 8).","items":[{"text":"Bán kính của đường tròn (C) bằng 6.","ans":true,"exp":"R² = 36 ⇒ R = 6."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng 10.","ans":true,"exp":"Tâm I(0; 2), IA = √(8² + 6²) = 10."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng 8.","ans":true,"exp":"Tiếp tuyến = √(IA² - R²) = √(100 - 36) = 8."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 10 km.","ans":false,"exp":"Khoảng cách ngắn nhất = IA - R = 10 - 6 = 4 km, không phải IA = 10 km (học sinh quên trừ bán kính)."}]},{"id":"ct_dt_006","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x + 2)² + (y + 1)² = 25 và điểm A(10; 4).","items":[{"text":"Bán kính của đường tròn (C) bằng 25.","ans":false,"exp":"R² = 25 ⇒ R = 5 (không phải 25, học sinh quên căn)."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng 13.","ans":true,"exp":"Tâm I(-2; -1), IA = √(12² + 5²) = 13."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng √194.","ans":false,"exp":"Tiếp tuyến = √(IA² - R²) = √(169 - 25) = √144 = 12, không phải √(IA² + R²) = √194."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 8 km.","ans":true,"exp":"Khoảng cách ngắn nhất = IA - R = 13 - 5 = 8 km."}]},{"id":"ct_dt_007","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x − 2)² + (y − 3)² = 16 và điểm A(8; 11).","items":[{"text":"Bán kính của đường tròn (C) bằng 4.","ans":true,"exp":"R² = 16 ⇒ R = 4."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng (8 − 2) + (11 − 3) = 14.","ans":false,"exp":"IA = √((8-2)² + (11-3)²) = √(36+64) = 10, không phải 14 (học sinh nhầm cộng hiệu thay vì dùng định lý Pythagore)."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng 2√21.","ans":true,"exp":"Tiếp tuyến = √(100 - 16) = √84 = 2√21."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 6 km.","ans":true,"exp":"Khoảng cách ngắn nhất = IA - R = 10 - 4 = 6 km."}]},{"id":"ct_dt_008","intro":"Trong mặt phẳng Oxy, cho đường tròn (C): (x − 1)² + (y − 1)² = 9 và điểm A(5; 4).","items":[{"text":"Bán kính của đường tròn (C) bằng 3.","ans":true,"exp":"R² = 9 ⇒ R = 3."},{"text":"Khoảng cách từ tâm I của đường tròn (C) đến điểm A bằng 5.","ans":true,"exp":"Tâm I(1; 1), IA = √(4² + 3²) = 5."},{"text":"Độ dài đoạn tiếp tuyến kẻ từ điểm A đến đường tròn (C) bằng √34.","ans":false,"exp":"Tiếp tuyến = √(IA² - R²) = √(25 - 9) = 4, không phải √(IA² + R²) = √34 (học sinh nhầm dấu)."},{"text":"Một trạm phát sóng có vùng phủ sóng là hình tròn (C) (đơn vị: km). Một người ở vị trí A cần di chuyển đến điểm gần nhất trên vùng phủ sóng. Khoảng cách ngắn nhất đó bằng 8 km.","ans":false,"exp":"Khoảng cách ngắn nhất = IA - R = 5 - 3 = 2 km, không phải IA + R = 8 km (học sinh nhầm cộng thay vì trừ)."}]}],"to_hop":[{"id":"ct_th_001","intro":"Một hộp có 12 viên bi khác nhau, trong đó có 7 viên bi màu xanh và 5 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 12.","ans":true,"exp":"Tổng số bi = 7 + 5 = 12, chọn 1 bi có 12 cách."},{"text":"Số cách xếp 7 viên bi xanh thành một hàng ngang là 5 040.","ans":true,"exp":"7! = 5 040."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 175.","ans":false,"exp":"\"Nhiều nhất 1 đỏ\" = 0 đỏ + 1 đỏ = C(7,4) + 5·C(7,3) = 35 + 175 = 210, không phải 175 (175 chỉ là trường hợp đúng 1 đỏ)."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 3 150.","ans":true,"exp":"7·5·A(10,2) = 7·5·90 = 3 150."}]},{"id":"ct_th_002","intro":"Một hộp có 14 viên bi khác nhau, trong đó có 8 viên bi màu xanh và 6 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 14.","ans":true,"exp":"Tổng = 14 bi."},{"text":"Số cách xếp 8 viên bi xanh thành một hàng ngang là 5 040.","ans":false,"exp":"8! = 40 320, không phải 5 040 (5 040 = 7!, học sinh nhầm)."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 406.","ans":true,"exp":"C(8,4) + 6·C(8,3) = 70 + 336 = 406."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 3 168.","ans":false,"exp":"8·6·A(12,2) = 8·6·132 = 6 336, không phải 3 168 (học sinh dùng C(12,2) = 66 thay vì A(12,2) = 132)."}]},{"id":"ct_th_003","intro":"Một hộp có 13 viên bi khác nhau, trong đó có 6 viên bi màu xanh và 7 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 13! cách.","ans":false,"exp":"Chọn 1 viên bi từ 13 viên có 13 cách (đây là tổ hợp chập 1, không phải hoán vị 13!)."},{"text":"Số cách xếp 6 viên bi xanh thành một hàng ngang là 720.","ans":true,"exp":"6! = 720."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 155.","ans":true,"exp":"C(6,4) + 7·C(6,3) = 15 + 140 = 155."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 4 620.","ans":true,"exp":"6·7·A(11,2) = 6·7·110 = 4 620."}]},{"id":"ct_th_004","intro":"Một hộp có 15 viên bi khác nhau, trong đó có 9 viên bi màu xanh và 6 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 15.","ans":true,"exp":"Tổng = 15 bi."},{"text":"Số cách xếp 9 viên bi xanh thành một hàng ngang là 362 880.","ans":true,"exp":"9! = 362 880."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 504.","ans":false,"exp":"\"Nhiều nhất 1 đỏ\" = 0 đỏ + 1 đỏ = C(9,4) + 6·C(9,3) = 126 + 504 = 630 (504 chỉ là trường hợp 1 đỏ, học sinh bỏ qua trường hợp 0 đỏ)."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 4 212.","ans":false,"exp":"9·6·A(13,2) = 9·6·156 = 8 424, không phải 4 212 (học sinh dùng C(13,2) = 78 thay vì A(13,2) = 156)."}]},{"id":"ct_th_005","intro":"Một hộp có 10 viên bi khác nhau, trong đó có 6 viên bi màu xanh và 4 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 10.","ans":true,"exp":"Tổng = 10 bi."},{"text":"Số cách xếp 6 viên bi xanh thành một hàng ngang là 6 + 5 + 4 + 3 + 2 + 1 = 21.","ans":false,"exp":"6! = 720, không phải 21 (học sinh nhầm hoán vị với phép cộng)."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 95.","ans":true,"exp":"C(6,4) + 4·C(6,3) = 15 + 80 = 95."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 1 344.","ans":true,"exp":"6·4·A(8,2) = 6·4·56 = 1 344."}]},{"id":"ct_th_006","intro":"Một hộp có 16 viên bi khác nhau, trong đó có 10 viên bi màu xanh và 6 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 10 · 6 = 60.","ans":false,"exp":"Chọn 1 viên bi bất kì = 16 cách (tổng số bi), không phải 10·6 = 60 (60 là số cách chọn 1 xanh + 1 đỏ)."},{"text":"Số cách xếp 10 viên bi xanh thành một hàng ngang là 3 628 800.","ans":true,"exp":"10! = 3 628 800."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 720.","ans":false,"exp":"\"Nhiều nhất 1 đỏ\" = 0 đỏ + 1 đỏ = C(10,4) + 6·C(10,3) = 210 + 720 = 930 (720 chỉ là trường hợp 1 đỏ)."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 10 920.","ans":true,"exp":"10·6·A(14,2) = 10·6·182 = 10 920."}]},{"id":"ct_th_007","intro":"Một hộp có 11 viên bi khác nhau, trong đó có 7 viên bi màu xanh và 4 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 11.","ans":true,"exp":"Tổng = 11 bi."},{"text":"Số cách xếp 7 viên bi xanh thành một hàng ngang là 5 040.","ans":true,"exp":"7! = 5 040."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 175.","ans":true,"exp":"C(7,4) + 4·C(7,3) = 35 + 140 = 175."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 1 008.","ans":false,"exp":"7·4·A(9,2) = 7·4·72 = 2 016, không phải 1 008 (học sinh dùng C(9,2) = 36 thay vì A(9,2) = 72)."}]},{"id":"ct_th_008","intro":"Một hộp có 13 viên bi khác nhau, trong đó có 8 viên bi màu xanh và 5 viên bi màu đỏ. Xét tính đúng sai của các khẳng định sau:","items":[{"text":"Số cách chọn ra một viên bi bất kì là 13.","ans":true,"exp":"Tổng = 13 bi."},{"text":"Số cách xếp 8 viên bi xanh thành một hàng ngang là 5 040.","ans":false,"exp":"8! = 40 320, không phải 5 040 (= 7!)."},{"text":"Số cách chọn ra 4 viên bi sao cho có nhiều nhất 1 viên bi đỏ là 350.","ans":true,"exp":"C(8,4) + 5·C(8,3) = 70 + 280 = 350."},{"text":"Số cách chọn ra và sắp xếp 4 viên bi thành một hàng sao cho viên bi đầu tiên là xanh và viên bi cuối cùng là đỏ là 2 200.","ans":false,"exp":"8·5·A(11,2) = 8·5·110 = 4 400, không phải 2 200 (học sinh dùng C(11,2) thay vì A(11,2))."}]}]};
+</script>
+
+<script>
+// ============= GAME LOGIC =============
+
+// CẤU HÌNH JSONBin (xem hướng dẫn trong file HUONG_DAN_CAU_HINH.md)
+const JSONBIN_BIN_ID = "69f6241eaaba88219762ee21";
+const JSONBIN_MASTER_KEY = "$2a$10$mZNn79zCu5jp/tkyidNOLOfNmemgKeN.faAmj2syGI5.dKGe9rM0S";
+const TEACHER_PASSWORD = "giaovien2025";
+
+const CLOUD_ENABLED = JSONBIN_BIN_ID !== "PASTE_YOUR_BIN_ID_HERE" && JSONBIN_MASTER_KEY !== "PASTE_YOUR_MASTER_KEY_HERE";
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const STORAGE_KEY = 'mathquest10_p2:results:v1';
+const PENDING_KEY = 'mathquest10_p2:pending:v1';
+const NAME_KEY = 'mathquest10_p2:lastname:v1';
+const TIME_LIMIT = 10 * 60;
+
+// Score table per matrix
+const SCORE_TABLE = { 0: 0, 1: 0.1, 2: 0.25, 3: 0.5, 4: 1.0 };
+
+const state = {
+  playerName: '',
+  questions: [],   // 2 questions: [duong_tron_q, to_hop_q]
+  currentIdx: 0,
+  answers: [],     // Array of { qid, picks: [bool, bool, bool, bool] }
+  startTime: null,
+  remaining: TIME_LIMIT,
+  timerInterval: null,
+};
+
+// ============= UTILS =============
+function localGet(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+  catch (e) { return fallback; }
+}
+function localSet(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
+function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============= CLOUD =============
+async function cloudFetchAll() {
+  if (!CLOUD_ENABLED) return null;
+  try {
+    const res = await fetch(JSONBIN_URL + '/latest', { headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, 'X-Bin-Meta': 'false' } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    return Array.isArray(data?.results) ? data.results : [];
+  } catch (e) { console.warn(e); return null; }
+}
+async function cloudPushResult(result) {
+  if (!CLOUD_ENABLED) return false;
+  try {
+    const current = (await cloudFetchAll()) || [];
+    current.push(result);
+    const res = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_MASTER_KEY },
+      body: JSON.stringify({ results: current })
+    });
+    return res.ok;
+  } catch (e) { return false; }
+}
+async function flushPending() {
+  const pending = localGet(PENDING_KEY, []);
+  if (pending.length === 0 || !CLOUD_ENABLED) return;
+  try {
+    const current = await cloudFetchAll();
+    if (current === null) return;
+    const merged = [...current, ...pending];
+    const res = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_MASTER_KEY },
+      body: JSON.stringify({ results: merged })
+    });
+    if (res.ok) localSet(PENDING_KEY, []);
+  } catch (e) {}
+}
+
+// ============= ADMIN =============
+let logoTaps = 0, logoTimer = null;
+function checkAdminAccess() {
+  if (new URLSearchParams(location.search).get('admin') === '1') showLogin();
+  document.querySelector('.logo').addEventListener('click', () => {
+    logoTaps++;
+    if (logoTimer) clearTimeout(logoTimer);
+    logoTimer = setTimeout(() => { logoTaps = 0; }, 2000);
+    if (logoTaps >= 5) { logoTaps = 0; showLogin(); }
+  });
+}
+function showLogin() {
+  const overlay = document.createElement('div');
+  overlay.className = 'login-overlay';
+  overlay.innerHTML = `
+    <div class="login-box">
+      <h2>Khu vực giáo viên</h2>
+      <p>Nhập mật khẩu để xem dashboard</p>
+      <input type="password" class="name-input" id="login-pwd" placeholder="Mật khẩu..." autofocus>
+      <div class="login-error" id="login-err"></div>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+        <button class="btn-primary" id="login-submit">Đăng nhập</button>
+        <button class="btn-secondary" id="login-cancel">Hủy</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const pwd = overlay.querySelector('#login-pwd');
+  const err = overlay.querySelector('#login-err');
+  const submit = () => {
+    if (pwd.value === TEACHER_PASSWORD) { overlay.remove(); openDashboard(); }
+    else { err.textContent = 'Mật khẩu không đúng'; pwd.value = ''; pwd.focus(); }
+  };
+  overlay.querySelector('#login-submit').addEventListener('click', submit);
+  overlay.querySelector('#login-cancel').addEventListener('click', () => overlay.remove());
+  pwd.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+}
+
+// ============= HOME =============
+function initHome() {
+  const totalCombos = POOL.duong_tron.length * POOL.to_hop.length;
+  document.getElementById('stat-pool').textContent = totalCombos;
+
+  const nameInput = document.getElementById('player-name');
+  const startBtn = document.getElementById('btn-start');
+  const historyBtn = document.getElementById('btn-show-history');
+
+  function refreshState() {
+    const v = nameInput.value.trim();
+    if (v.length < 2) {
+      startBtn.style.opacity = '0.35';
+      startBtn.style.cursor = 'not-allowed';
+    } else {
+      startBtn.style.opacity = '';
+      startBtn.style.cursor = 'pointer';
+    }
+    historyBtn.style.display = v.length >= 2 ? 'inline-block' : 'none';
+  }
+
+  const lastName = localStorage.getItem(NAME_KEY) || '';
+  if (lastName) { nameInput.value = lastName; }
+  refreshState();
+
+  ['input','change','keyup','blur','paste'].forEach(evt => nameInput.addEventListener(evt, refreshState));
+  nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); nameInput.blur(); refreshState();
+      if (nameInput.value.trim().length >= 2) startQuiz();
+    }
+  });
+
+  function tryStart(e) {
+    if (e) e.preventDefault();
+    refreshState();
+    const v = nameInput.value.trim();
+    if (v.length >= 2) startQuiz();
+    else nameInput.focus();
+  }
+  startBtn.addEventListener('click', tryStart);
+  startBtn.addEventListener('touchend', tryStart);
+
+  document.getElementById('btn-show-leaderboard').addEventListener('click', async () => {
+    await renderLeaderboard(); showScreen('screen-leaderboard');
+  });
+  document.getElementById('btn-show-history').addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (name.length >= 2) { renderHistory(name); showScreen('screen-history'); }
+  });
+  document.getElementById('btn-back-from-lb').addEventListener('click', () => showScreen('screen-home'));
+  document.getElementById('btn-back-from-history').addEventListener('click', () => showScreen('screen-home'));
+
+  const cs = document.getElementById('cloud-status');
+  cs.innerHTML = CLOUD_ENABLED
+    ? '<span class="ok">●</span> Đã đồng bộ cloud'
+    : '<span class="warn">●</span> Chế độ offline (chưa cấu hình cloud)';
+
+  flushPending();
+}
+
+// ============= QUIZ =============
+function startQuiz() {
+  const name = document.getElementById('player-name').value.trim();
+  if (name.length < 2) return;
+  state.playerName = name;
+  localStorage.setItem(NAME_KEY, name);
+
+  // Pick 1 đường tròn + 1 tổ hợp
+  const q1 = pickOne(POOL.duong_tron);
+  const q2 = pickOne(POOL.to_hop);
+  state.questions = [
+    { ...q1, topic: 'Đường tròn' },
+    { ...q2, topic: 'Tổ hợp' }
+  ];
+  state.currentIdx = 0;
+  state.answers = state.questions.map(q => ({ qid: q.id, picks: [null, null, null, null] }));
+  state.startTime = Date.now();
+  state.remaining = TIME_LIMIT;
+
+  startTimer();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function startTimer() {
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  updateTimer();
+  state.timerInterval = setInterval(() => {
+    state.remaining--;
+    updateTimer();
+    if (state.remaining <= 0) { clearInterval(state.timerInterval); finishQuiz(true); }
+  }, 1000);
+}
+function updateTimer() {
+  const el = document.getElementById('q-timer');
+  el.textContent = formatTime(Math.max(0, state.remaining));
+  el.classList.toggle('warn', state.remaining <= 60);
+}
+
+function calcCurrentScore() {
+  let total = 0;
+  state.answers.forEach((a, qi) => {
+    const q = state.questions[qi];
+    let correctCount = 0;
+    a.picks.forEach((p, i) => { if (p !== null && p === q.items[i].ans) correctCount++; });
+    // only count if all 4 picks made
+    if (a.picks.every(p => p !== null)) {
+      total += SCORE_TABLE[correctCount];
+    }
+  });
+  return total;
+}
+
+function renderQuestion() {
+  const q = state.questions[state.currentIdx];
+  const ans = state.answers[state.currentIdx];
+
+  document.getElementById('q-current').textContent = state.currentIdx + 1;
+  document.getElementById('q-score').textContent = calcCurrentScore().toFixed(2);
+  document.getElementById('progress-fill').style.width = (state.currentIdx / state.questions.length * 100) + '%';
+
+  const letters = ['a', 'b', 'c', 'd'];
+  const itemsHtml = q.items.map((it, i) => `
+    <div class="item-row" data-item="${i}">
+      <div class="item-letter">${letters[i]})</div>
+      <div class="item-content">
+        <div class="item-text">${escapeHtml(it.text)}</div>
+        <div class="ts-buttons">
+          <button class="ts-btn" data-pick="true" data-item="${i}">✓ Đúng</button>
+          <button class="ts-btn" data-pick="false" data-item="${i}">✗ Sai</button>
+        </div>
+        <div class="item-feedback" data-feedback="${i}"></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('question-card').innerHTML = `
+    <div class="question-meta">
+      <div class="question-num">Câu ${state.currentIdx + 1} · ${q.items.length} ý đúng/sai</div>
+      <div class="question-topic">${escapeHtml(q.topic)}</div>
+    </div>
+    <div class="question-intro">${escapeHtml(q.intro)}</div>
+    ${itemsHtml}
+  `;
+
+  // Restore previous picks if any (for back navigation in future)
+  ans.picks.forEach((pick, i) => {
+    if (pick !== null) applyPickUI(i, pick, true);
+  });
+
+  // Bind handlers
+  document.querySelectorAll('.ts-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.item);
+      const pick = btn.dataset.pick === 'true';
+      handlePick(idx, pick);
+    });
+  });
+
+  updateNextButton();
+}
+
+function applyPickUI(itemIdx, pick, showFeedback) {
+  const buttons = document.querySelectorAll(`.ts-btn[data-item="${itemIdx}"]`);
+  const q = state.questions[state.currentIdx];
+  const correctAns = q.items[itemIdx].ans;
+
+  buttons.forEach(btn => {
+    btn.classList.add('disabled');
+    btn.classList.remove('selected', 'correct', 'wrong');
+    const btnPick = btn.dataset.pick === 'true';
+    if (btnPick === correctAns) btn.classList.add('correct');
+    else if (btnPick === pick) btn.classList.add('wrong');
+  });
+
+  if (showFeedback) {
+    const fb = document.querySelector(`.item-feedback[data-feedback="${itemIdx}"]`);
+    const isRight = pick === correctAns;
+    fb.classList.add('show', isRight ? 'correct' : 'wrong');
+    const correctText = correctAns ? 'ĐÚNG' : 'SAI';
+    const exp = q.items[itemIdx].exp || '';
+    fb.innerHTML = `
+      <strong>${isRight ? '✓ Chính xác — đáp án: ' + correctText : '✗ Chưa đúng — đáp án: ' + correctText}</strong>
+      ${exp ? '<br>' + escapeHtml(exp) : ''}
+    `;
+  }
+}
+
+function handlePick(itemIdx, pick) {
+  const ans = state.answers[state.currentIdx];
+  if (ans.picks[itemIdx] !== null) return; // already picked
+
+  ans.picks[itemIdx] = pick;
+  applyPickUI(itemIdx, pick, true);
+
+  // Update score display
+  document.getElementById('q-score').textContent = calcCurrentScore().toFixed(2);
+
+  updateNextButton();
+}
+
+function updateNextButton() {
+  const ans = state.answers[state.currentIdx];
+  const allDone = ans.picks.every(p => p !== null);
+  const btn = document.getElementById('btn-next');
+  const info = document.getElementById('progress-info');
+  btn.disabled = !allDone;
+  if (allDone) {
+    btn.textContent = state.currentIdx === state.questions.length - 1 ? 'Xem kết quả →' : 'Câu tiếp theo →';
+    info.textContent = '✓ Đã trả lời đủ 4 ý';
+  } else {
+    const remaining = ans.picks.filter(p => p === null).length;
+    info.textContent = `Còn ${remaining} ý chưa trả lời`;
+  }
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  state.currentIdx++;
+  if (state.currentIdx >= state.questions.length) finishQuiz(false);
+  else renderQuestion();
+});
+
+// ============= FINISH =============
+async function finishQuiz(timedOut) {
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  const timeSec = TIME_LIMIT - state.remaining;
+  const totalScore = calcCurrentScore();
+
+  // Compute per-question correct count
+  const breakdown = state.questions.map((q, qi) => {
+    const a = state.answers[qi];
+    let correct = 0;
+    a.picks.forEach((p, i) => { if (p === q.items[i].ans) correct++; });
+    const pts = a.picks.every(p => p !== null) ? SCORE_TABLE[correct] : SCORE_TABLE[correct]; // give partial even if not finished
+    return { qid: q.id, topic: q.topic, correct, total: 4, pts };
+  });
+
+  const totalCorrect = breakdown.reduce((s, b) => s + b.correct, 0);
+  const totalWrong = 8 - totalCorrect;
+
+  const result = {
+    name: state.playerName,
+    score: totalScore,
+    maxScore: 2.0,
+    correctItems: totalCorrect,
+    wrongItems: totalWrong,
+    timeSec,
+    timedOut,
+    date: Date.now(),
+    breakdown,
+    answers: state.answers,
+  };
+
+  // Save local (with full questions for review)
+  const localResult = { ...result, questions: state.questions };
+  const local = localGet(STORAGE_KEY, []);
+  local.push(localResult);
+  if (local.length > 100) local.splice(0, local.length - 100);
+  localSet(STORAGE_KEY, local);
+
+  // Push to cloud (compact)
+  if (CLOUD_ENABLED) {
+    const ok = await cloudPushResult(result);
+    if (!ok) {
+      const pending = localGet(PENDING_KEY, []);
+      pending.push(result);
+      localSet(PENDING_KEY, pending);
+    }
+  }
+
+  renderResult(localResult);
+  showScreen('screen-result');
+}
+
+function renderResult(r) {
+  const pct = r.score / r.maxScore;
+  let emoji, title, sub;
+  if (pct === 1) { emoji = '🏆'; title = 'Xuất sắc!'; sub = 'Đạt điểm tuyệt đối — bạn quá đỉnh!'; fireConfetti(); }
+  else if (pct >= 0.75) { emoji = '🎉'; title = 'Rất tốt!'; sub = 'Bạn đã làm bài rất tốt'; fireConfetti(); }
+  else if (pct >= 0.5) { emoji = '👏'; title = 'Khá!'; sub = 'Cố gắng thêm chút nữa nhé'; }
+  else if (pct >= 0.25) { emoji = '💪'; title = 'Trung bình'; sub = 'Cần ôn thêm các phần chưa nắm vững'; }
+  else { emoji = '📚'; title = 'Hãy ôn lại'; sub = r.timedOut ? 'Hết giờ rồi! Lần sau cố gắng nhanh hơn.' : 'Đừng nản, làm lại để cải thiện!'; }
+
+  document.getElementById('r-emoji').textContent = emoji;
+  document.getElementById('r-title').textContent = title;
+  document.getElementById('r-subtitle').textContent = sub;
+  document.getElementById('r-score').textContent = r.score.toFixed(2);
+  document.getElementById('r-correct').textContent = r.correctItems;
+  document.getElementById('r-wrong').textContent = r.wrongItems;
+  document.getElementById('r-time').textContent = formatTime(r.timeSec);
+
+  // Breakdown
+  const bd = document.getElementById('breakdown');
+  bd.innerHTML = `
+    <div class="breakdown-title">— Chi tiết điểm —</div>
+    ${r.breakdown.map((b, i) => `
+      <div class="breakdown-row">
+        <div class="label">Câu ${i+1} (${escapeHtml(b.topic)}): đúng ${b.correct}/4 ý</div>
+        <div class="pts">${b.pts.toFixed(2)} điểm</div>
+      </div>
+    `).join('')}
+    <div class="breakdown-row" style="border-top:1px solid var(--card-border);padding-top:10px;margin-top:6px;">
+      <div class="label" style="font-weight:700;">Tổng điểm</div>
+      <div class="pts" style="font-size:18px;">${r.score.toFixed(2)} / 2.00</div>
+    </div>
+  `;
+
+  // Review
+  const letters = ['a','b','c','d'];
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = r.questions.map((q, qi) => {
+    const a = r.answers[qi];
+    const itemsHtml = q.items.map((it, i) => {
+      const pick = a.picks[i];
+      const isRight = pick === it.ans;
+      const pickedText = pick === null ? 'Chưa trả lời' : (pick ? 'ĐÚNG' : 'SAI');
+      const correctText = it.ans ? 'ĐÚNG' : 'SAI';
+      return `
+        <div class="review-item-row">
+          <div class="lt">${letters[i]})</div>
+          <div class="tx">
+            ${escapeHtml(it.text)}
+            <span class="pick ${pick === null ? 'wrong' : (isRight ? 'right' : 'wrong')}">Bạn chọn: ${pickedText} · Đáp án: ${correctText}</span>
+            ${it.exp && !isRight ? `<span class="exp">${escapeHtml(it.exp)}</span>` : ''}
+          </div>
+          <div class="mk ${isRight ? 'ok' : 'no'}">${isRight ? '✓' : '✗'}</div>
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="review-card">
+        <div class="review-card-title">Câu ${qi+1} · ${escapeHtml(q.topic)} · ${r.breakdown[qi].pts.toFixed(2)} điểm</div>
+        <div class="review-intro">${escapeHtml(q.intro)}</div>
+        ${itemsHtml}
+      </div>
+    `;
+  }).join('');
+
+  renderLeaderboardInto('result-leaderboard', 5);
+}
+
+document.getElementById('btn-retry').addEventListener('click', startQuiz);
+document.getElementById('btn-home').addEventListener('click', () => showScreen('screen-home'));
+
+// ============= LEADERBOARD =============
+async function getCombinedResults() {
+  if (CLOUD_ENABLED) {
+    const cloud = await cloudFetchAll();
+    if (cloud) return cloud;
+  }
+  return localGet(STORAGE_KEY, []);
+}
+
+async function getLeaderboardData() {
+  const all = await getCombinedResults();
+  const byPlayer = {};
+  all.forEach(r => {
+    const key = r.name.toLowerCase().trim();
+    if (!byPlayer[key] || r.score > byPlayer[key].score || (r.score === byPlayer[key].score && r.timeSec < byPlayer[key].timeSec)) {
+      byPlayer[key] = r;
+    }
+  });
+  return Object.values(byPlayer).sort((a,b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.timeSec - b.timeSec;
+  });
+}
+
+async function renderLeaderboard() { await renderLeaderboardInto('lb-list', 100); }
+
+async function renderLeaderboardInto(elId, limit) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '<div class="empty-lb">Đang tải<span class="loading-dots"></span></div>';
+  try {
+    const lb = (await getLeaderboardData()).slice(0, limit);
+    if (lb.length === 0) {
+      el.innerHTML = '<div class="empty-lb">Chưa có dữ liệu — hãy là người đầu tiên!</div>';
+      return;
+    }
+    const myName = state.playerName.toLowerCase().trim();
+    el.innerHTML = lb.map((r, i) => {
+      const rank = i + 1;
+      let cls = '';
+      if (rank === 1) cls = 'gold'; else if (rank === 2) cls = 'silver'; else if (rank === 3) cls = 'bronze';
+      if (myName && r.name.toLowerCase().trim() === myName) cls += ' me';
+      const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '#' + rank;
+      return `
+        <div class="lb-row ${cls}">
+          <div class="lb-rank">${medal}</div>
+          <div class="lb-name">${escapeHtml(r.name)}</div>
+          <div class="lb-time">${formatTime(r.timeSec)}</div>
+          <div class="lb-score">${r.score.toFixed(2)}/2.0</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) { el.innerHTML = '<div class="empty-lb">Lỗi tải dữ liệu</div>'; }
+}
+
+// ============= HISTORY =============
+async function renderHistory(name) {
+  document.getElementById('history-name').textContent = name;
+  const list = document.getElementById('history-list');
+  list.innerHTML = '<div class="empty-lb">Đang tải<span class="loading-dots"></span></div>';
+  const all = await getCombinedResults();
+  const key = name.toLowerCase().trim();
+  const history = all.filter(r => r.name.toLowerCase().trim() === key).sort((a,b) => b.date - a.date);
+  if (history.length === 0) { list.innerHTML = '<div class="empty-lb">Chưa có lượt làm bài nào.</div>'; return; }
+  list.innerHTML = history.slice(0,50).map((r,i) => {
+    const d = new Date(r.date);
+    const dateStr = d.toLocaleString('vi-VN', {dateStyle:'short', timeStyle:'short'});
+    return `
+      <div class="history-card">
+        <div>
+          <div style="font-weight:600;margin-bottom:4px;">Lượt ${history.length - i}</div>
+          <div class="history-info">${dateStr} · ${formatTime(r.timeSec)} · ${r.correctItems}/8 ý đúng${r.timedOut ? ' · Hết giờ' : ''}</div>
+        </div>
+        <div class="history-score">${r.score.toFixed(2)}/2.0</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ============= CONFETTI =============
+function fireConfetti() {
+  const colors = ['#ffd23f', '#ff6b6b', '#4ecdc4', '#6bcf7f', '#f0ebe1'];
+  for (let i = 0; i < 50; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      document.body.appendChild(c);
+      const dur = 2.5 + Math.random() * 2;
+      const drift = (Math.random() - 0.5) * 200;
+      c.animate([
+        { transform: 'translate(0,0) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${drift}px, 105vh) rotate(${720 + Math.random()*360}deg)`, opacity: 0.3 }
+      ], { duration: dur*1000, easing: 'cubic-bezier(.2,.6,.4,1)' });
+      setTimeout(() => c.remove(), dur*1000);
+    }, i * 30);
+  }
+}
+
+// ============= DASHBOARD =============
+async function openDashboard() { showScreen('screen-dashboard'); await refreshDashboard(); }
+
+async function refreshDashboard() {
+  const statusEl = document.getElementById('refresh-status');
+  statusEl.className = 'refresh-status loading';
+  statusEl.innerHTML = '<span class="dot"></span>Đang tải dữ liệu<span class="loading-dots"></span>';
+
+  let results;
+  if (CLOUD_ENABLED) {
+    results = await cloudFetchAll();
+    if (results === null) {
+      statusEl.className = 'refresh-status error';
+      statusEl.innerHTML = '<span class="dot"></span>Không kết nối được cloud';
+      results = localGet(STORAGE_KEY, []);
+    } else {
+      statusEl.className = 'refresh-status';
+      statusEl.innerHTML = `<span class="dot"></span>Đã cập nhật ${new Date().toLocaleTimeString('vi-VN')}`;
+    }
+  } else {
+    results = localGet(STORAGE_KEY, []);
+    statusEl.className = 'refresh-status error';
+    statusEl.innerHTML = '<span class="dot"></span>Chỉ xem dữ liệu trên máy này';
+  }
+
+  renderDashboard(results);
+}
+
+function renderDashboard(results) {
+  const totalAttempts = results.length;
+  const uniqueStudents = new Set(results.map(r => r.name.toLowerCase().trim())).size;
+  const avgScore = totalAttempts > 0 ? (results.reduce((s,r)=>s+r.score,0) / totalAttempts).toFixed(2) : '0.00';
+  const passCount = results.filter(r => r.score >= 1.0).length;
+  const passRate = totalAttempts > 0 ? Math.round(passCount/totalAttempts*100) : 0;
+
+  document.getElementById('dash-total-attempts').textContent = totalAttempts;
+  document.getElementById('dash-unique-students').textContent = uniqueStudents;
+  document.getElementById('dash-avg-score').textContent = avgScore;
+  document.getElementById('dash-pass-rate').textContent = passRate + '%';
+
+  // Histogram - 9 buckets: 0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0
+  const bucketLabels = ['0', '0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75', '2.0'];
+  const buckets = Array(9).fill(0);
+  results.forEach(r => {
+    // round to nearest 0.25
+    const bucket = Math.round(r.score / 0.25);
+    if (bucket >= 0 && bucket < 9) buckets[bucket]++;
+  });
+  const maxB = Math.max(...buckets, 1);
+  document.getElementById('histogram').innerHTML = buckets.map((c, i) => {
+    const pct = c / maxB * 100;
+    const h = pct > 0 ? Math.max(3, pct * 1.7) : 3;
+    return `
+      <div class="hist-bar-wrap">
+        <div class="hist-bar" style="height:${h}px;" title="${bucketLabels[i]} điểm: ${c} lượt">
+          ${c > 0 ? `<span class="count">${c}</span>` : ''}
+        </div>
+        <div class="hist-label">${bucketLabels[i]}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Wrong items stats - aggregate across all results
+  const itemStats = {};  // key: qid + ":" + itemIdx
+  results.forEach(r => {
+    if (!r.answers) return;
+    r.answers.forEach((a, qi) => {
+      // Find question data from POOL
+      const q = [...POOL.duong_tron, ...POOL.to_hop].find(qq => qq.id === a.qid);
+      if (!q) return;
+      a.picks.forEach((pick, i) => {
+        const key = a.qid + ':' + i;
+        if (!itemStats[key]) {
+          itemStats[key] = { total: 0, wrong: 0, q, itemIdx: i };
+        }
+        itemStats[key].total++;
+        if (pick !== q.items[i].ans) itemStats[key].wrong++;
+      });
+    });
+  });
+
+  const sortedItems = Object.values(itemStats)
+    .filter(x => x.total >= 1)
+    .map(x => ({ ...x, rate: x.wrong / x.total }))
+    .sort((a,b) => b.rate - a.rate)
+    .slice(0, 10);
+
+  const qstatsEl = document.getElementById('qstats-list');
+  if (sortedItems.length === 0) {
+    qstatsEl.innerHTML = '<div class="empty-lb">Chưa có dữ liệu</div>';
+  } else {
+    const letters = ['a','b','c','d'];
+    qstatsEl.innerHTML = sortedItems.map(x => {
+      const ratePct = Math.round(x.rate * 100);
+      const cls = ratePct >= 60 ? 'high' : ratePct >= 35 ? 'mid' : 'low';
+      const item = x.q.items[x.itemIdx];
+      const topic = x.q.id.includes('dt') ? 'Đường tròn' : 'Tổ hợp';
+      return `
+        <div class="qstat-item">
+          <div class="qstat-header">
+            <div class="qstat-q">[${letters[x.itemIdx]}] ${escapeHtml(item.text)}</div>
+            <div class="qstat-rate ${cls}">${ratePct}% sai</div>
+          </div>
+          <div class="qstat-bar"><div class="qstat-bar-fill ${cls}" style="width:${ratePct}%"></div></div>
+          <div class="qstat-meta">
+            <span class="topic">${topic} · Đáp án đúng: ${item.ans ? 'ĐÚNG' : 'SAI'}</span>
+            <span>${x.wrong}/${x.total} lượt sai</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Students table
+  const byStudent = {};
+  results.forEach(r => {
+    const key = r.name.toLowerCase().trim();
+    if (!byStudent[key]) {
+      byStudent[key] = { name: r.name, attempts: 0, bestScore: 0, scoreSum: 0, bestTime: Infinity, lastDate: 0 };
+    }
+    const s = byStudent[key];
+    s.attempts++;
+    s.scoreSum += r.score;
+    if (r.score > s.bestScore) { s.bestScore = r.score; s.bestTime = r.timeSec; }
+    else if (r.score === s.bestScore && r.timeSec < s.bestTime) s.bestTime = r.timeSec;
+    if (r.date > s.lastDate) s.lastDate = r.date;
+  });
+  const studentsArr = Object.values(byStudent).map(s => ({...s, avgScore: (s.scoreSum / s.attempts).toFixed(2)}))
+    .sort((a,b) => { if (b.bestScore !== a.bestScore) return b.bestScore - a.bestScore; return a.bestTime - b.bestTime; });
+
+  const studentsEl = document.getElementById('students-list');
+  if (studentsArr.length === 0) {
+    studentsEl.innerHTML = '<div class="empty-lb">Chưa có học sinh nào làm bài</div>';
+  } else {
+    studentsEl.innerHTML = `
+      <div style="overflow-x:auto;">
+      <table class="students-table">
+        <thead><tr><th style="width:40px;">#</th><th>Họ tên</th><th class="num">Lượt</th><th class="num">Điểm CN</th><th class="num">Điểm TB</th><th class="num">Thời gian</th><th>Lần cuối</th></tr></thead>
+        <tbody>
+          ${studentsArr.map((s,i) => {
+            const cls = s.bestScore >= 1.5 ? 'green' : s.bestScore >= 1.0 ? 'amber' : 'red';
+            const d = new Date(s.lastDate);
+            return `
+              <tr>
+                <td class="num">${i+1}</td>
+                <td class="name-cell">${escapeHtml(s.name)}</td>
+                <td class="num">${s.attempts}</td>
+                <td class="score ${cls}">${s.bestScore.toFixed(2)}</td>
+                <td class="num">${s.avgScore}</td>
+                <td class="num">${formatTime(s.bestTime)}</td>
+                <td>${d.toLocaleString('vi-VN', {dateStyle:'short', timeStyle:'short'})}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+      </div>
+    `;
+  }
+}
+
+document.getElementById('btn-dash-refresh').addEventListener('click', refreshDashboard);
+document.getElementById('btn-dash-home').addEventListener('click', () => showScreen('screen-home'));
+
+// ============= INIT =============
+initHome();
+checkAdminAccess();
+</script>
+
+</body>
+</html>
